@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { ImageUploader } from './components/ImageUploader';
 import { ResultDisplay } from './components/ResultDisplay';
@@ -11,14 +10,12 @@ const App: React.FC = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [charLimit, setCharLimit] = useState<number>(125);
   const [altText, setAltText] = useState<string>('');
-  const [keywords, setKeywords] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleImageChange = (file: File | null) => {
     setImageFile(file);
     setAltText('');
-    setKeywords([]);
     setError(null);
     if (file) {
       const reader = new FileReader();
@@ -38,13 +35,11 @@ const App: React.FC = () => {
     }
     setIsLoading(true);
     setAltText('');
-    setKeywords([]);
     setError(null);
 
     try {
-      const { altText: generatedText, keywords: generatedKeywords } = await generateAltText(imageFile, charLimit);
+      const generatedText = await generateAltText(imageFile, charLimit);
       setAltText(generatedText);
-      setKeywords(generatedKeywords);
     } catch (err: unknown) {
       if (err instanceof Error) {
           setError(`Ocorreu um erro: ${err.message}. Tente novamente.`);
@@ -65,7 +60,7 @@ const App: React.FC = () => {
           </div>
           <h1 className="text-4xl font-bold text-gray-800">Gerador de Texto Alternativo</h1>
           <p className="text-lg text-gray-600 mt-2">
-            Crie descrições acessíveis para suas imagens com o poder da IA.
+            Crie descrições acessíveis para suas imagens.
           </p>
         </header>
 
@@ -108,17 +103,13 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex flex-col">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Resultado da Análise</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Resultado</h2>
             <div className="flex-grow">
                 {error && <div className="text-red-600 bg-red-100 p-4 rounded-lg">{error}</div>}
-                <ResultDisplay altText={altText} keywords={keywords} isLoading={isLoading} charLimit={charLimit} />
+                <ResultDisplay altText={altText} isLoading={isLoading} />
             </div>
           </div>
         </main>
-
-        <footer className="text-center mt-8 text-gray-500 text-sm">
-          <p>Powered by Google Gemini</p>
-        </footer>
       </div>
     </div>
   );
