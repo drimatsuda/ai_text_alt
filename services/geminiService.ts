@@ -1,17 +1,25 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { fileToBase64 } from "../utils/fileUtils";
 
-const API_KEY = process.env.API_KEY;
+let aiInstance: GoogleGenAI | null = null;
 
-if (!API_KEY) {
-  throw new Error("A chave da API do Google Gemini não está configurada.");
-}
+const getAiInstance = (): GoogleGenAI => {
+  if (!aiInstance) {
+    // This check prevents a crash in a browser environment outside of AI Studio
+    // where process.env is not defined.
+    const API_KEY = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : undefined;
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+    if (!API_KEY) {
+        throw new Error("A chave da API do Google Gemini não está configurada. Para que o aplicativo funcione fora do Google AI Studio, a chave da API precisa ser configurada.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey: API_KEY });
+  }
+  return aiInstance;
+};
 
 export const generateAltText = async (imageFile: File, maxChars: number): Promise<string> => {
   try {
+    const ai = getAiInstance();
     const base64Data = await fileToBase64(imageFile);
 
     const imagePart = {
@@ -33,6 +41,10 @@ export const generateAltText = async (imageFile: File, maxChars: number): Promis
     return response.text.trim();
   } catch (error) {
     console.error("Erro ao gerar texto alternativo:", error);
+    // Propagate the specific API key error message to the UI.
+    if (error instanceof Error && error.message.includes("chave da API")) {
+        throw error;
+    }
     throw new Error("Não foi possível se comunicar com a API do Gemini.");
   }
 };
