@@ -1,0 +1,5 @@
+{
+  "name": "Gerador de Texto Alternativo",
+  "description": "Um aplicativo que usa IA para gerar texto alternativo (alt text) para imagens, ajudando a melhorar a acessibilidade da web. Os usuários podem fazer upload de uma imagem e especificar um limite de caracteres para a descrição.",
+  "requestFramePermissions": []
+}
